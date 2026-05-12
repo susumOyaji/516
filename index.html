@@ -11,10 +11,19 @@
         
         body {
             font-family: 'Inter', sans-serif;
-            background: #0a0a0a;
+            background: transparent;
             color: white;
             margin: 0;
             overflow: hidden;
+        }
+
+        /* Desktop App Draggable Region */
+        .window-header {
+            -webkit-app-region: drag;
+        }
+
+        .no-drag {
+            -webkit-app-region: no-drag;
         }
 
         .font-mono {
@@ -44,14 +53,14 @@
     <div id="widget-container" class="relative z-10 w-[480px]">
         <div class="bg-black/60 backdrop-blur-3xl border border-white/10 rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
             <!-- Window Header -->
-            <div class="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-white/[0.02]">
-                <div class="flex gap-1.5 opacity-50">
+            <div class="window-header flex items-center justify-between px-6 py-4 border-b border-white/5 bg-white/[0.02] cursor-grab active:cursor-grabbing">
+                <div class="flex gap-1.5 opacity-50 no-drag">
                     <div class="w-3 h-3 rounded-full bg-white/10"></div>
                     <div class="w-3 h-3 rounded-full bg-white/10"></div>
                     <div class="w-3 h-3 rounded-full bg-white/10"></div>
                 </div>
-                <span class="text-[10px] uppercase tracking-[0.2em] font-medium text-white/40">Market.Observer // No-Vite</span>
-                <div class="flex items-center gap-3">
+                <span class="text-[10px] uppercase tracking-[0.2em] font-medium text-white/40">Market.Observer // Desktop</span>
+                <div class="flex items-center gap-3 no-drag">
                      <button id="toggle-jp" class="text-[9px] px-1.5 py-0.5 rounded border border-white/10 text-white/20 hover:border-white/30 transition-colors">GLO</button>
                 </div>
             </div>
@@ -66,7 +75,7 @@
                       id="stock-input"
                       type="text"
                       placeholder="Enter Symbol... (AAPL)"
-                      class="w-full bg-white/[0.02] border border-white/5 rounded-xl py-3 pl-10 pr-4 text-sm text-white focus:outline-none focus:border-white/20 transition-all placeholder:text-white/10"
+                      class="no-drag w-full bg-white/[0.02] border border-white/5 rounded-xl py-3 pl-10 pr-4 text-sm text-white focus:outline-none focus:border-white/20 transition-all placeholder:text-white/10"
                     />
                 </div>
                 <p id="error-msg" class="hidden text-[10px] text-rose-500 font-medium tracking-tight uppercase"></p>
@@ -100,6 +109,21 @@
     <!-- Axios for API calls -->
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <!-- Main UI Logic -->
+    <script>
+        // Check if running in Electron
+        if (window.navigator.userAgent.indexOf('Electron') !== -1) {
+            document.body.classList.remove('items-center', 'justify-center');
+            document.body.classList.add('p-0');
+            document.getElementById('widget-container').classList.remove('w-[480px]');
+            document.getElementById('widget-container').classList.add('w-full', 'h-full');
+            // Hide the desktop simulation background in real app
+            const simulation = document.querySelector('.z-0');
+            if (simulation) simulation.style.display = 'none';
+        } else {
+            // Keep the background simulation for web preview
+            document.body.style.background = '#0a0a0a';
+        }
+    </script>
     <script src="ui.js"></script>
 </body>
 </html>

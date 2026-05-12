@@ -118,7 +118,7 @@ function createStockCard(data, variant) {
                 <div class="px-3 py-1 bg-${color} text-black text-[11px] font-bold rounded-full mb-1 italic flex items-center gap-1">
                     ${isPositive ? '+' : ''}${data.change}
                     <span class="text-[9px] opacity-80 font-medium ml-1">(${data.changePercent?.toFixed(2)}%)</span>
-                    <div class="flex gap-1 ml-2 opacity-60">
+                    <div class="flex gap-1 ml-2 opacity-60 no-drag">
                         <button class="refresh-btn hover:scale-110">⟳</button>
                         <button class="remove-btn hover:scale-110">✕</button>
                     </div>
@@ -143,7 +143,7 @@ function createStockCard(data, variant) {
             <div class="text-right flex flex-col items-end">
                 <div class="flex items-center gap-2">
                     <p class="font-mono text-sm text-white/80">${currency}${data.price.toLocaleString()}</p>
-                    <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity no-drag">
                          <button class="refresh-btn text-white/20 hover:text-white text-[10px]">⟳</button>
                          <button class="remove-btn text-white/20 hover:text-rose-400 text-[10px]">✕</button>
                     </div>

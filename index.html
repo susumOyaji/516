@@ -1,13 +1,105 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>My Google AI Studio App</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
-</html>
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Market Observer</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700;900&family=JetBrains+Mono&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0a0a0a;
+            color: white;
+            margin: 0;
+            overflow: hidden;
+        }
 
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center relative">
+    <!-- Desktop Background Simulation -->
+    <div class="absolute inset-0 z-0">
+        <div class="absolute top-[-20%] left-[-10%] w-[70%] h-[70%] bg-blue-600/10 rounded-full blur-[150px]"></div>
+        <div class="absolute bottom-[-20%] right-[-10%] w-[70%] h-[70%] bg-purple-900/10 rounded-full blur-[150px]"></div>
+    </div>
+
+    <!-- Floating Widget Centered in Web -->
+    <div id="widget-container" class="relative z-10 w-[480px]">
+        <div class="bg-black/60 backdrop-blur-3xl border border-white/10 rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <!-- Window Header -->
+            <div class="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-white/[0.02]">
+                <div class="flex gap-1.5 opacity-50">
+                    <div class="w-3 h-3 rounded-full bg-white/10"></div>
+                    <div class="w-3 h-3 rounded-full bg-white/10"></div>
+                    <div class="w-3 h-3 rounded-full bg-white/10"></div>
+                </div>
+                <span class="text-[10px] uppercase tracking-[0.2em] font-medium text-white/40">Market.Observer // No-Vite</span>
+                <div class="flex items-center gap-3">
+                     <button id="toggle-jp" class="text-[9px] px-1.5 py-0.5 rounded border border-white/10 text-white/20 hover:border-white/30 transition-colors">GLO</button>
+                </div>
+            </div>
+
+            <!-- Input & Controls -->
+            <div class="px-8 pt-6 pb-2 space-y-4">
+                <div class="relative group">
+                    <div class="absolute left-3 top-1/2 -translate-y-1/2 text-white/20">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                    </div>
+                    <input
+                      id="stock-input"
+                      type="text"
+                      placeholder="Enter Symbol... (AAPL)"
+                      class="w-full bg-white/[0.02] border border-white/5 rounded-xl py-3 pl-10 pr-4 text-sm text-white focus:outline-none focus:border-white/20 transition-all placeholder:text-white/10"
+                    />
+                </div>
+                <p id="error-msg" class="hidden text-[10px] text-rose-500 font-medium tracking-tight uppercase"></p>
+            </div>
+
+            <!-- Stock List -->
+            <div id="stock-list" class="flex-1 overflow-y-auto px-8 py-4 space-y-6 custom-scrollbar min-h-[200px]">
+                <!-- Dynamic Content -->
+            </div>
+
+            <!-- Footer -->
+            <div class="mt-auto p-6 bg-white/[0.02] border-t border-white/5 flex justify-between items-center">
+                <div class="flex items-center gap-2">
+                    <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                    <span class="text-[9px] uppercase tracking-tighter text-white/30 font-bold">Standard JS • Simple Stream</span>
+                </div>
+                <div id="last-update" class="text-[9px] text-white/20 font-mono">
+                    AWAITING SYNC
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- UI Overlay Info -->
+    <div class="absolute bottom-8 text-center w-full opacity-20 pointer-events-none">
+        <p class="text-[9px] uppercase tracking-widest text-white/50">
+            Vanilla Mode: No Build Step Required
+        </p>
+    </div>
+
+    <!-- Axios for API calls -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <!-- Main UI Logic -->
+    <script src="ui.js"></script>
+</body>
+</html>

@@ -19,7 +19,7 @@ function createWindow() {
   // In production, load the built index.html
   const startUrl = isDev 
     ? 'http://localhost:3000' 
-    : `file://${path.join(__dirname, '../dist/index.html')}`;
+    : `file://${path.join(__dirname, '../index.html')}`;
 
   win.loadURL(startUrl);
 

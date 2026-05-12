@@ -1,0 +1,6 @@
+{
+  "name": "Stock Floating Ticker",
+  "description": "A high-fidelity desktop-style floating widget for tracking stock prices from Yahoo Finance and Yahoo Japan.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}

@@ -1,24 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Search, Plus, Settings, ExternalLink, Moon, Sun } from 'lucide-react';
+import { Search, Settings } from 'lucide-react';
 import axios from 'axios';
 import { StockCard } from './StockCard';
 
-interface StockData {
-  symbol: string;
-  name?: string;
-  price: string | number;
-  change: string | number;
-  changePercent?: number;
-  isJp: boolean;
-}
-
 export default function FloatingWidget() {
-  const [stocks, setStocks] = useState<StockData[]>([]);
+  const [stocks, setStocks] = useState([]);
   const [inputSymbol, setInputSymbol] = useState("");
   const [isJpSearch, setIsJpSearch] = useState(false);
-  const [loading, setLoading] = useState<Record<string, boolean>>({});
-  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState({});
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const saved = localStorage.getItem('ticker-stocks');
@@ -26,7 +17,7 @@ export default function FloatingWidget() {
       try {
         const parsed = JSON.parse(saved);
         setStocks(parsed);
-        parsed.forEach((s: StockData) => refreshStock(s.symbol, s.isJp));
+        parsed.forEach((s) => refreshStock(s.symbol, s.isJp));
       } catch (e) {
         console.error("Failed to load stocks", e);
         loadDefaults();
@@ -57,17 +48,16 @@ export default function FloatingWidget() {
     }
   }, [stocks]);
 
-  const fetchStock = async (symbol: string, isJp: boolean) => {
+  const fetchStock = async (symbol, isJp) => {
     const endpoint = isJp ? `/api/stocks/yahoo-jp/${encodeURIComponent(symbol)}` : `/api/stocks/yahoo-finance/${encodeURIComponent(symbol)}`;
     const response = await axios.get(endpoint);
     return { ...response.data, isJp };
   };
 
-  const addStock = async (symbol: string, isJp: boolean) => {
+  const addStock = async (symbol, isJp) => {
     if (!symbol) return;
     const cleanSymbol = symbol.trim().toUpperCase();
     
-    // Prevent duplicates using functional update state to ensure we have latest
     let isDuplicate = false;
     setStocks(prev => {
       if (prev.find(s => s.symbol === cleanSymbol && s.isJp === isJp)) {
@@ -94,7 +84,7 @@ export default function FloatingWidget() {
     }
   };
 
-  const refreshStock = async (symbol: string, isJp: boolean) => {
+  const refreshStock = async (symbol, isJp) => {
     setLoading(prev => ({ ...prev, [symbol]: true }));
     try {
       const data = await fetchStock(symbol, isJp);
@@ -106,7 +96,7 @@ export default function FloatingWidget() {
     }
   };
 
-  const removeStock = (symbol: string, isJp: boolean) => {
+  const removeStock = (symbol, isJp) => {
     setStocks(prev => prev.filter(s => !(s.symbol === symbol && s.isJp === isJp)));
   };
 

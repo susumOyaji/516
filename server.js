@@ -23,7 +23,6 @@ async function startServer() {
       });
       const $ = cheerio.load(response.data);
 
-      // Selectors for Yahoo Japan Finance (Resilient approach)
       const price = 
         $("._3P79ux_L").first().text() || 
         $("._388SshBy").first().text() || 
@@ -39,15 +38,10 @@ async function startServer() {
         $("._10Y-G_fU").text() ||
         $("[class*='StyledQuoteSummary__title']").text() ||
         $("h1").first().text();
-      const high = $("._1562i4l-").eq(1).text();
-      const low = $("._1562i4l-").eq(2).text();
 
-      // Fallback selectors if the above fail
       const fallbackPrice = $("div[class*='StyledQuoteSummary__price']").text();
       
       const cleanPrice = (price || fallbackPrice || "0").replace(/[¥円,]/g, '').trim();
-      
-      // Yahoo Japan change text is often: "+10.0 (+0.45%)" or similar
       const changeText = change || "0";
       const changeMatch = changeText.match(/([+-]?[\d,.]+)/);
       const percentMatch = changeText.match(/\(([+-]?[\d,.]+)%\)/);
@@ -79,7 +73,6 @@ async function startServer() {
     try {
       const response = await axios.get(url);
       const result = response.data.chart.result[0];
-      const quote = result.indicators.quote[0];
       const meta = result.meta;
 
       res.json({
@@ -92,7 +85,6 @@ async function startServer() {
         url: `https://finance.yahoo.com/quote/${encodedSymbol}`
       });
     } catch (error) {
-      // Fallback to simple scraping if chart API fails
       try {
         const scrapeUrl = `https://finance.yahoo.com/quote/${encodedSymbol}`;
         const response = await axios.get(scrapeUrl, {
@@ -116,7 +108,6 @@ async function startServer() {
     }
   });
 
-  // Vite middleware for development
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
       server: { middlewareMode: true },

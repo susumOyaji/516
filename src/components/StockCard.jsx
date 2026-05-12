@@ -1,26 +1,8 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { TrendingUp, TrendingDown, RefreshCw, X } from 'lucide-react';
+import { RefreshCw, X } from 'lucide-react';
 
-interface StockData {
-  symbol: string;
-  name?: string;
-  price: string | number;
-  change: string | number;
-  changePercent?: number;
-  isJp?: boolean;
-  currency?: string;
-}
-
-interface StockCardProps {
-  data: StockData;
-  onRemove: () => void;
-  onRefresh: () => void;
-  loading?: boolean;
-  variant?: 'hero' | 'list';
-}
-
-export const StockCard: React.FC<StockCardProps> = ({ 
+export const StockCard = ({ 
   data, 
   onRemove, 
   onRefresh, 

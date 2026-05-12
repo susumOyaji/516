@@ -5,13 +5,12 @@
   "type": "module",
   "main": "electron/main.cjs",
   "scripts": {
-    "dev": "tsx server.ts",
+    "dev": "node server.js",
     "electron:dev": "concurrently \"npm run dev\" \"wait-on http://localhost:3000 && electron .\"",
     "build": "vite build",
     "electron:build": "npm run build && electron-builder",
     "preview": "vite preview",
-    "clean": "rm -rf dist",
-    "lint": "tsc --noEmit"
+    "clean": "rm -rf dist"
   },
   "build": {
     "appId": "com.ticker.floating",
@@ -21,7 +20,8 @@
     },
     "files": [
       "dist/**/*",
-      "electron/**/*"
+      "electron/**/*",
+      "package.json"
     ],
     "mac": {
       "category": "public.app-category.finance"
@@ -33,7 +33,6 @@
   "dependencies": {
     "@google/genai": "^1.29.0",
     "@tailwindcss/vite": "^4.1.14",
-    "@types/cheerio": "^0.22.35",
     "@vitejs/plugin-react": "^5.0.4",
     "axios": "^1.16.0",
     "cheerio": "^1.2.0",
@@ -46,16 +45,12 @@
     "vite": "^6.2.3"
   },
   "devDependencies": {
-    "@types/express": "^4.17.21",
-    "@types/node": "^22.14.0",
     "autoprefixer": "^10.4.21",
     "concurrently": "^9.2.1",
     "electron": "^42.0.1",
     "electron-builder": "^26.8.1",
     "electron-is-dev": "^3.0.1",
     "tailwindcss": "^4.1.14",
-    "tsx": "^4.21.0",
-    "typescript": "~5.8.2",
     "vite": "^6.2.3",
     "wait-on": "^9.0.10"
   }

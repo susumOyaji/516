@@ -62,11 +62,17 @@
                 <span class="text-[10px] uppercase tracking-[0.2em] font-medium text-white/40">Market.Observer // Desktop</span>
                 <div class="flex items-center gap-3 no-drag">
                      <button id="toggle-jp" class="text-[9px] px-1.5 py-0.5 rounded border border-white/10 text-white/20 hover:border-white/30 transition-colors">GLO</button>
+                     <button id="reset-defaults" class="text-[9px] px-1.5 py-0.5 rounded border border-white/10 text-white/20 hover:border-white/30 transition-colors">RST</button>
                 </div>
             </div>
 
             <!-- Input & Controls -->
             <div class="px-8 pt-6 pb-2 space-y-4">
+                <div class="px-2">
+                    <span id="current-time" class="text-[45px] text-yellow-400 font-mono italic"></span>
+                    <div id="permanent-stocks" class="space-y-1 mt-2"></div>
+                </div>
+                
                 <div class="relative group">
                     <div class="absolute left-3 top-1/2 -translate-y-1/2 text-white/20">
                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>

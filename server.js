@@ -2,6 +2,7 @@ import express from "express";
 import path from "path";
 import axios from "axios";
 import * as cheerio from "cheerio";
+import fs from "fs";
 
 async function startServer() {
   const app = express();
@@ -11,12 +12,38 @@ async function startServer() {
 
   // Serve static files from root
   app.use(express.static("."));
-
-  // API Route: Scrape Yahoo Japan Finance
   app.get("/api/stocks/yahoo-jp/:symbol", async (req, res) => {
     const { symbol } = req.params;
-    const url = `https://finance.yahoo.co.jp/quote/${symbol}`;
+    console.log(`Route hit for symbol: ${symbol}`);
+    
+    // Map symbol to Yahoo Japan Finance ticker format if needed
+    if (symbol === "998407.O") {
+        const encodedSymbol = encodeURIComponent("^N225");
+        const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodedSymbol}?interval=1m&range=1d`;
+        try {
+            const response = await axios.get(url);
+            const result = response.data.chart.result[0];
+            const meta = result.meta;
+            res.json({
+                symbol: "998407.O",
+                name: "日経平均",
+                price: meta.regularMarketPrice,
+                change: meta.regularMarketPrice - meta.previousClose,
+                changePercent: ((meta.regularMarketPrice - meta.previousClose) / meta.previousClose) * 100,
+                currency: meta.currency,
+                url: `https://finance.yahoo.com/quote/%5EN225`
+            });
+            return;
+        } catch (error) {
+            console.error("Global API Error for 998407.O:", error.message);
+            res.status(500).json({ error: "Failed to fetch index data" });
+            return;
+        }
+    }
 
+    const targetSymbol = symbol;
+    const url = `https://finance.yahoo.co.jp/quote/${encodeURIComponent(targetSymbol)}`;
+    
     try {
       const response = await axios.get(url, {
         headers: {
@@ -24,14 +51,32 @@ async function startServer() {
         }
       });
       const $ = cheerio.load(response.data);
+      
+      // Attempt to extract from __PRELOADED_STATE__
+      let preloadedState = null;
+      const match = response.data.match(/window\.__PRELOADED_STATE__\s*=\s*({.*?});/s);
+      if (match && match[1]) {
+          try {
+              preloadedState = JSON.parse(match[1]);
+          } catch(e) {
+              console.error("Error parsing preloaded state", e);
+          }
+      }
 
-      const price = 
+      const priceText = 
+        (preloadedState && preloadedState.mainDomesticIndexPriceBoard ? preloadedState.mainDomesticIndexPriceBoard.indexPrices.price : null) ||
+        $(".StyledNumber__value__3rXW").first().text() ||
+        $("[data-test='price-value']").text() ||
+        $("dt:contains('現在値') + dd span").text() || 
         $("._3P79ux_L").first().text() || 
         $("._388SshBy").first().text() || 
-        $("[data-test='price-value']").text() ||
-        $("div[class*='StyledQuoteSummary__price']").first().text();
+        $("div[class*='StyledQuoteSummary__price']").first().text() ||
+        $("span[class*='Price__price']").text();
+      
+      const price = priceText;
 
       const change = 
+        (preloadedState && preloadedState.mainDomesticIndexPriceBoard ? preloadedState.mainDomesticIndexPriceBoard.indexPrices.changePrice : null) ||
         $("._1562i4l-").first().text() ||
         $("[data-test='price-change']").text() ||
         $("[class*='StyledQuoteSummary__change']").first().text();
@@ -45,6 +90,7 @@ async function startServer() {
       
       const cleanPrice = (price || fallbackPrice || "0").replace(/[¥円,]/g, '').trim();
       const changeText = change || "0";
+      
       const changeMatch = changeText.match(/([+-]?[\d,.]+)/);
       const percentMatch = changeText.match(/\(([+-]?[\d,.]+)%\)/);
 
@@ -61,8 +107,8 @@ async function startServer() {
         url
       });
     } catch (error) {
-      console.error("Yahoo JP Scrape Error:", error);
-      res.status(500).json({ error: "Failed to fetch Yahoo Japan data" });
+      console.error("Yahoo JP Scrape Error:", error.message, error.response ? error.response.status : '');
+      res.status(500).json({ error: "Failed to fetch Yahoo Japan data", details: error.message });
     }
   });
 

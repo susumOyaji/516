@@ -11,13 +11,17 @@ const state = {
 
 // UI Elements
 const stockListEl = document.getElementById('stock-list');
+const permanentStocksEl = document.getElementById('permanent-stocks');
 const toggleJpBtn = document.getElementById('toggle-jp');
+const resetDefaultsBtn = document.getElementById('reset-defaults');
 const stockInput = document.getElementById('stock-input');
 const errorMsgEl = document.getElementById('error-msg');
 const updateTimeEl = document.getElementById('last-update');
+const currentTimeEl = document.getElementById('current-time');
 
 // Initialize
 function init() {
+    startClock();
     const saved = localStorage.getItem('ticker-stocks-vanilla');
     if (saved) {
         try {
@@ -37,9 +41,17 @@ function init() {
     }, 30000);
 }
 
+function startClock() {
+    function updateClock() {
+        const now = new Date();
+        currentTimeEl.innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
+}
+
 async function loadDefaults() {
-    await addStock("7203", true);
-    await addStock("AAPL", false);
+    await addStock("998407.O", true);
     await addStock("^DJI", false);
 }
 
@@ -62,7 +74,7 @@ async function addStock(symbol, isJp) {
         render();
         stockInput.value = "";
     } catch (e) {
-        showError(`Failed to add ${cleanSymbol}`);
+        showError(`Failed to add ${cleanSymbol}: ${e.message}`);
     }
 }
 
@@ -91,17 +103,29 @@ async function fetchStock(symbol, isJp) {
 
 // Rendering
 function render() {
+    permanentStocksEl.innerHTML = '';
+    stockListEl.innerHTML = '';
+    
     if (state.stocks.length === 0) {
         stockListEl.innerHTML = '<div class="text-center py-12 opacity-20"><p class="text-xs uppercase tracking-[0.2em]">Awaiting Data Feed</p></div>';
         return;
     }
-
-    stockListEl.innerHTML = '';
+    
+    const permanentSymbols = ["998407.O", "^DJI"];
     
     state.stocks.forEach((stock, index) => {
-        const card = createStockCard(stock, index === 0 ? 'hero' : 'list');
-        stockListEl.appendChild(card);
+        if (permanentSymbols.includes(stock.symbol)) {
+            const card = createStockCard(stock, 'list');
+            permanentStocksEl.appendChild(card);
+        } else {
+            const card = createStockCard(stock, index === 0 ? 'hero' : 'list');
+            stockListEl.appendChild(card);
+        }
     });
+
+    if (permanentStocksEl.children.length === 0) {
+        permanentStocksEl.innerHTML = '<div class="text-center py-2 opacity-20"><p class="text-[9px] uppercase">Awaiting Indices</p></div>';
+    }
 }
 
 function createStockCard(data, variant) {
@@ -114,7 +138,7 @@ function createStockCard(data, variant) {
         div.className = "relative group flex flex-col gap-1 p-2 animate-in fade-in slide-in-from-bottom-4 duration-500";
         div.innerHTML = `
             <div class="flex justify-between items-end">
-                <h2 class="text-5xl font-light tracking-tighter text-white">${data.symbol}${data.isJp ? '.T' : ''}</h2>
+                <h2 class="text-5xl font-light tracking-tighter text-white">${data.symbol === '998407.O' ? '日経平均' : (data.symbol === '^DJI' ? 'ダウ平均' : data.symbol)}</h2>
                 <div class="px-3 py-1 bg-${color} text-black text-[11px] font-bold rounded-full mb-1 italic flex items-center gap-1">
                     ${isPositive ? '+' : ''}${data.change}
                     <span class="text-[9px] opacity-80 font-medium ml-1">(${data.changePercent?.toFixed(2)}%)</span>
@@ -136,7 +160,7 @@ function createStockCard(data, variant) {
             <div class="flex items-center gap-4">
                 <div class="w-1.5 h-1.5 rounded-full bg-${color}"></div>
                 <div>
-                    <p class="text-xs font-bold tracking-tight text-white/90">${data.symbol}${data.isJp ? '.T' : ''}</p>
+                    <p class="text-xs font-bold tracking-tight text-white/90">${data.symbol === '998407.O' ? '日経平均' : (data.symbol === '^DJI' ? 'ダウ平均' : data.symbol)}</p>
                     <p class="text-[10px] text-white/40 uppercase tracking-tighter truncate max-w-[120px]">${data.name || 'Asset'}</p>
                 </div>
             </div>
@@ -183,6 +207,12 @@ toggleJpBtn.addEventListener('click', () => {
     toggleJpBtn.innerText = state.isJpSearch ? 'JPN' : 'GLO';
     toggleJpBtn.className = `text-[9px] px-1.5 py-0.5 rounded border transition-colors ${state.isJpSearch ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-400' : 'bg-white/5 border-white/10 text-white/20'}`;
     stockInput.placeholder = state.isJpSearch ? "Enter Code... (7203)" : "Enter Symbol... (AAPL)";
+});
+
+resetDefaultsBtn.addEventListener('click', async () => {
+    state.stocks = [];
+    localStorage.removeItem('ticker-stocks-vanilla');
+    await loadDefaults();
 });
 
 stockInput.addEventListener('keydown', (e) => {

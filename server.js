@@ -10,11 +10,17 @@ async function startServer() {
 
   app.use(express.json());
 
+  // Logging middleware
+  app.use((req, res, next) => {
+      console.log(`Request: ${req.method} ${req.url}`);
+      next();
+  });
+
   // Serve static files from root
   app.use(express.static("."));
-  app.get("/api/stocks/yahoo-jp/:symbol", async (req, res) => {
-    const { symbol } = req.params;
-    console.log(`Route hit for symbol: ${symbol}`);
+  app.get("/api/stocks/yahoo-jp/*", async (req, res) => {
+    const symbol = req.params[0];
+    console.log(`Route hit for symbol (JP): ${symbol}`);
     
     // Map symbol to Yahoo Japan Finance ticker format if needed
     if (symbol === "998407.O") {
@@ -113,8 +119,8 @@ async function startServer() {
   });
 
   // API Route: Get Yahoo Finance (Global) data
-  app.get("/api/stocks/yahoo-finance/:symbol", async (req, res) => {
-    const { symbol } = req.params;
+  app.get("/api/stocks/yahoo-finance/*", async (req, res) => {
+    const symbol = req.params[0];
     const encodedSymbol = encodeURIComponent(symbol);
     const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodedSymbol}?interval=1m&range=1d`;
 
@@ -158,6 +164,12 @@ async function startServer() {
 
   app.get("*", (req, res) => {
     res.sendFile(path.join(process.cwd(), "index.html"));
+  });
+
+  // 404 handler
+  app.use((req, res, next) => {
+      console.log(`404 NOT FOUND: ${req.method} ${req.url}, Headers: ${JSON.stringify(req.headers)}`);
+      res.status(404).json({ error: "Not found", path: req.url });
   });
 
   app.listen(PORT, "0.0.0.0", () => {

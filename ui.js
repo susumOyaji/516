@@ -26,9 +26,11 @@ function init() {
     if (saved) {
         try {
             state.stocks = JSON.parse(saved);
+            if (!Array.isArray(state.stocks)) throw new Error("Invalid state format");
             render();
             state.stocks.forEach(s => refreshStock(s.symbol, s.isJp));
         } catch (e) {
+            console.error("Failed to parse saved state, loading defaults:", e);
             loadDefaults();
         }
     } else {
@@ -53,10 +55,16 @@ function startClock() {
 async function loadDefaults() {
     await addStock("998407.O", true);
     await addStock("^DJI", false);
+    await addStock("^IXIC", false);
 }
 
 function saveState() {
-    localStorage.setItem('ticker-stocks-vanilla', JSON.stringify(state.stocks));
+    try {
+        localStorage.setItem('ticker-stocks-vanilla', JSON.stringify(state.stocks));
+        console.log("State saved to localStorage successfully.");
+    } catch (e) {
+        console.error("Failed to save state to localStorage:", e);
+    }
 }
 
 // Actions
@@ -97,8 +105,13 @@ function removeStock(symbol, isJp) {
 
 async function fetchStock(symbol, isJp) {
     const endpoint = isJp ? `/api/stocks/yahoo-jp/${encodeURIComponent(symbol)}` : `/api/stocks/yahoo-finance/${encodeURIComponent(symbol)}`;
-    const response = await axios.get(endpoint);
-    return { ...response.data, isJp };
+    console.log("Fetching:", endpoint);
+    const response = await fetch(endpoint);
+    if (!response.ok) {
+        throw new Error(`Failed to fetch stock: ${response.statusText}`);
+    }
+    const data = await response.json();
+    return { ...data, isJp };
 }
 
 // Rendering
@@ -111,7 +124,7 @@ function render() {
         return;
     }
     
-    const permanentSymbols = ["998407.O", "^DJI"];
+    const permanentSymbols = ["998407.O", "^DJI", "^IXIC"];
     
     state.stocks.forEach((stock, index) => {
         if (permanentSymbols.includes(stock.symbol)) {
@@ -138,7 +151,7 @@ function createStockCard(data, variant) {
         div.className = "relative group flex flex-col gap-1 p-2 animate-in fade-in slide-in-from-bottom-4 duration-500";
         div.innerHTML = `
             <div class="flex justify-between items-end">
-                <h2 class="text-5xl font-light tracking-tighter text-white">${data.symbol === '998407.O' ? '日経平均' : (data.symbol === '^DJI' ? 'ダウ平均' : data.symbol)}</h2>
+                <h2 class="text-5xl font-light tracking-tighter text-white">${data.symbol === '998407.O' ? '日経平均' : (data.symbol === '^DJI' ? 'ダウ平均' : (data.symbol === '^IXIC' ? 'Nasdaq' : data.symbol))}</h2>
                 <div class="px-3 py-1 bg-${color} text-black text-[11px] font-bold rounded-full mb-1 italic flex items-center gap-1">
                     ${isPositive ? '+' : ''}${data.change}
                     <span class="text-[9px] opacity-80 font-medium ml-1">(${data.changePercent?.toFixed(2)}%)</span>
@@ -160,7 +173,7 @@ function createStockCard(data, variant) {
             <div class="flex items-center gap-4">
                 <div class="w-1.5 h-1.5 rounded-full bg-${color}"></div>
                 <div>
-                    <p class="text-xs font-bold tracking-tight text-white/90">${data.symbol === '998407.O' ? '日経平均' : (data.symbol === '^DJI' ? 'ダウ平均' : data.symbol)}</p>
+                    <p class="text-xs font-bold tracking-tight text-white/90">${data.symbol === '998407.O' ? '日経平均' : (data.symbol === '^DJI' ? 'ダウ平均' : (data.symbol === '^IXIC' ? 'Nasdaq' : data.symbol))}</p>
                     <p class="text-[10px] text-white/40 uppercase tracking-tighter truncate max-w-[120px]">${data.name || 'Asset'}</p>
                 </div>
             </div>
